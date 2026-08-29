@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cronometer-core"
+version = "1.0.0"
+description = "Shared Python core for the Cronometer CLI and MCP server (Cronometer nutrition & biometric data)."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "John Kattenhorn" }]
+keywords = ["cronometer", "nutrition", "biometrics", "mcp", "cli"]
+dependencies = [
+    "click>=8.1,<9",
+    "requests>=2.31,<3",
+    "pydantic>=2.6,<3",
+]
+
+[project.optional-dependencies]
+# The full `fastmcp` package includes server support (the separate `fastmcp-slim`
+# package is the one that needs a `[server]` extra).
+mcp = ["fastmcp>=2.11"]
+dev = [
+    "fastmcp>=2.11",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "responses>=0.25",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "types-requests",
+]
+
+[project.scripts]
+cronometer = "cronometer_core.cli:cli"
+cronometer-mcp = "cronometer_core.mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cronometer_core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Integration tests are opt-in: deselected by default, run via `-m integration`.
+addopts = "-ra -m 'not integration'"
+markers = [
+    "integration: hits the live Cronometer API (requires CRONOMETER_USERNAME/PASSWORD); opt-in.",
+]
+
+[tool.coverage.run]
+source = ["cronometer_core"]
+branch = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "S"]
+ignore = ["S101"]  # asserts are fine in this codebase/tests
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["cronometer_core"]
+mypy_path = "src"
+ignore_missing_imports = true
+warn_unused_ignores = false
+disallow_untyped_defs = false

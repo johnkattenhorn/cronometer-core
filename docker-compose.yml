@@ -1,0 +1,37 @@
+services:
+  cronometer-mcp:
+    build: .
+    container_name: cronometer-mcp
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - PORT=3000
+      - MCP_TRANSPORT=http
+      # Optional OpenTelemetry export. OTEL_ENABLED gates it (default off in
+      # code); point OTEL_EXPORTER_OTLP_ENDPOINT at your own collector.
+      # - OTEL_ENABLED=true
+      # - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      # - OTEL_SERVICE_NAME=cronometer-mcp
+    volumes:
+      # OAuth state (client registrations + tokens) for CRONOMETER_AUTH=oidc.
+      # Without this the encrypted store lives on the container layer and every
+      # restart forces each connector to re-authorise.
+      - cronometer-fastmcp:/home/appuser/.local/share/fastmcp
+    healthcheck:
+      # 127.0.0.1, deliberately NOT localhost. In these containers `localhost`
+      # can resolve to ::1 while the server listens on 0.0.0.0 (IPv4 only), and
+      # a client without an IPv4 fallback then sits unhealthy while the endpoint
+      # answers fine from outside. Pin the family rather than rely on a resolver
+      # fallback. The explicit timeout stops a hung connection from eating the
+      # whole healthcheck window.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://127.0.0.1:3000/health', timeout=5).status==200 else sys.exit(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  cronometer-fastmcp:

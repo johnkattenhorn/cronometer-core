@@ -1,0 +1,49 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Git
+.git/
+.gitignore
+
+# Python caches / build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Tests
+tests/
+
+# Environment files (secrets passed at runtime via env_file)
+.env
+.env.*
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD configs
+.github/
+.onedev-buildspec.yml
+
+# IDE / editor
+.vscode/
+.cursor/
+.idea/
+*.swp
+*.swo
+
+# Misc
+.DS_Store
+*.log
